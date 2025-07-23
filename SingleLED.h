@@ -1,7 +1,7 @@
 #ifndef SINGLELED_H
 #define SINGLELED_H
 
-#define DEFAULT_BRIGHTNESS 5
+#define DEFAULT_BRIGHTNESS 128 // Default brightness level (0-255)
 
 #include <stdint.h>
 
@@ -14,11 +14,11 @@
 class LED
 {
 private:
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
-    uint8_t brightness; ///< in the range [0, 7]
-    bool mask;
+    uint8_t red; ///< Red component of the color (0-255)
+    uint8_t green; ///< Green component of the color (0-255)
+    uint8_t blue; ///< Blue component of the color (0-255)
+    uint8_t brightness; ///< in the range [0, 255]
+    bool mask; ///< Mask to control whether the LED is on or off
 
 public:
     /**
@@ -66,9 +66,16 @@ public:
     /**
      * @brief Set the Brightness of the LED
      * 
-     * @param b Brightness level (0-7)
+     * @param b Brightness level (0-255)
      */
     void SetBrightness(uint8_t b);
+
+    /**
+     * @brief Get the Brightness of the LED
+     * 
+     * @return uint8_t Brightness level (0-255)
+     */
+    uint8_t GetBrightness() const;
 
     /**
      * @brief Increase the Brightness of the LED by 1
