@@ -42,6 +42,7 @@ add_executable(bookshelf-light
     RainbowEffect.cpp
     RainbowGradient.cpp
     BreatheEffect.cpp
+    LoadingEffect.cpp
 )
 
 pico_set_program_name(bookshelf-light "bookshelf-light")
