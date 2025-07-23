@@ -8,6 +8,8 @@
 /**
  * @brief Class representing a single LED in the strip.
  * 
+ * @todo Consider using a color struct or class for better color management.
+ * @todo Consider dynamic size allocation for the LED array if needed instead of fixed size.
  */
 class LED
 {
