@@ -9,9 +9,9 @@ uint32_t LED::GetColorGRB(void)
     }
     else {
         // Apply brightness scaling
-        uint8_t scaled_red = (red * brightness) / 7;
-        uint8_t scaled_green = (green * brightness) / 7;
-        uint8_t scaled_blue = (blue * brightness) / 7;
+        uint8_t scaled_red = (red * brightness) / UINT8_MAX;
+        uint8_t scaled_green = (green * brightness) / UINT8_MAX;
+        uint8_t scaled_blue = (blue * brightness) / UINT8_MAX;
 
         return ((uint32_t)scaled_green << 16) | ((uint32_t)scaled_red << 8) | ((uint32_t)scaled_blue << 0);
     }
@@ -43,12 +43,17 @@ void LED::ToggleMask(void)
 
 void LED::SetBrightness(uint8_t b)
 {
-    brightness = (b > 7) ? 7 : b; // Ensure brightness is within [0, 7]
+    brightness = b;
+}
+
+uint8_t LED::GetBrightness() const
+{
+    return brightness;
 }
 
 void LED::IncreaseBrightness()
 {
-    if(brightness < 7) {
+    if(brightness < UINT8_MAX) {
         brightness += 1;
     }
 }
