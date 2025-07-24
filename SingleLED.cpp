@@ -31,6 +31,11 @@ void LED::SetColor(uint32_t rgb)
     blue = ((rgb >> 0) & 0xFF);
 }
 
+uint32_t LED::GetColor() const
+{
+    return (red << 16) | (green << 8) | blue; // Return the color in RGB format (0xRRGGBB)
+}
+
 void LED::SetMask(bool m)
 {
     mask = m;

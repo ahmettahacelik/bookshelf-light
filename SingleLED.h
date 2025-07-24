@@ -51,6 +51,13 @@ public:
     void SetColor(uint32_t rgb);
 
     /**
+     * @brief Get the Color of the LED
+     * 
+     * @return uint32_t color code of the LED in RGB format (0xRRGGBB)
+     */
+    uint32_t GetColor() const;
+
+    /**
      * @brief Set the Mask of the LED
      * 
      * @param m true to mask, false to unmask

@@ -1,5 +1,7 @@
 #include "RainbowEffect.h"
 
+#include "RainbowGradient.h"
+
 RainbowEffect::RainbowEffect(LEDStrip* led_strip, uint32_t start_time_ms, uint32_t duration_ms, bool is_periodic, bool is_shifting)
     : Effect(led_strip, start_time_ms, duration_ms, is_periodic),
       is_shifting(is_shifting),

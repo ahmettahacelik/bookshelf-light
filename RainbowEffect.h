@@ -2,7 +2,6 @@
 #define RAINBOW_EFFECT_H
 
 #include "Effect.h"
-#include "RainbowGradient.h" ///< Get array of rainbow colors 120 elements
 
 class RainbowEffect : public Effect {
 public:

@@ -28,6 +28,11 @@ void LEDStrip::SetPixel(uint8_t i, uint32_t rgb)
     led_arr[i].SetColor(rgb);
 }
 
+uint32_t LEDStrip::GetPixel(uint8_t i) const
+{
+    return led_arr[i].GetColor();
+}
+
 void LEDStrip::SetAll(uint32_t rgb)
 {
     for(int i = 0; i < NUM_LED; i++) {led_arr[i].SetColor(rgb);}
