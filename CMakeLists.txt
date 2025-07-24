@@ -43,6 +43,7 @@ add_executable(bookshelf-light
     RainbowGradient.cpp
     BreatheEffect.cpp
     LoadingEffect.cpp
+    DiffusionEffect.cpp
 )
 
 pico_set_program_name(bookshelf-light "bookshelf-light")
@@ -59,7 +60,8 @@ pico_enable_stdio_usb(bookshelf-light 1)
 target_link_libraries(bookshelf-light
         pico_stdlib
         hardware_pio
-        hardware_dma)
+        hardware_dma
+        pico_rand)
 
 # Add the standard include files to the build
 target_include_directories(bookshelf-light PRIVATE

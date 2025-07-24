@@ -58,6 +58,14 @@ class LEDStrip {
         void SetPixel(uint8_t i, uint32_t rgb);
 
         /**
+         * @brief Get the color of a specific pixel
+         * 
+         * @param i Index of the pixel
+         * @return uint32_t Color in RGB format
+         */
+        uint32_t GetPixel(uint8_t i) const;
+
+        /**
          * @brief Set the color of all pixels in the strip
          * 
          * @param rgb Color in RGB format
