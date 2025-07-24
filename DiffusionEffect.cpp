@@ -13,7 +13,7 @@ DiffusionEffect::DiffusionEffect(LEDStrip* strip, uint32_t start_time_ms, uint32
       diffusion_speed(diffusion_speed),
       last_update_time(start_time_ms)
 {
-    led_strip->SetAll(0xFFFFFF); // Initialize all LEDs to white
+    led_strip->SetAll(0x000000); // Initialize all LEDs to black
 }
 
 bool DiffusionEffect::Update(uint32_t current_time)
@@ -55,6 +55,9 @@ bool DiffusionEffect::Update(uint32_t current_time)
     return return_value;
 };
 
+/// @todo Ignore black colors in diffusion since it dominates the whole strip
+/// @todo Adjust center weight based on diffusion speed (left and right weights)
+/// @todo lef_weight + center_weight + right_weight should be 1.0
 uint32_t DiffusionEffect::WeightedSmoothPixel(uint32_t left_color, uint32_t current_color, uint32_t right_color) const
 {
     // Calculate the weighted average of the three colors with diffusion_speed
