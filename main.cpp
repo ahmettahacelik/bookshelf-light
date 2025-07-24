@@ -22,7 +22,7 @@ int main(void) {
 
     //LoadingEffect loading_effect(&led_strip, 0, 600000, 0x000000, 0x00FFFF);
 
-    DiffusionEffect diffusion_effect(&led_strip, 0, 10000, 0.1f, 1000, 0.5f);
+    DiffusionEffect diffusion_effect(&led_strip, 0, 10000, 0.1f, 100, 0.99f);
 
     sleep_ms(5000); // Allow some time for initialization
 
