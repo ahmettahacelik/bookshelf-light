@@ -34,6 +34,7 @@ private:
     int16_t max_step_size; ///< Maximum step size for diffusion effect
     uint32_t last_update_time; ///< Last update time in milliseconds
     uint32_t refresh_interval; ///< Refresh interval for the effect
+    uint16_t random_noise_index; ///< Index for random noise application
 };
 
 
