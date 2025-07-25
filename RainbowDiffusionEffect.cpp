@@ -3,24 +3,28 @@
 #include "RainbowGradient.h"
 #include <pico/rand.h>
 
-/// @todo no need for circular update, the strip is linear not circular
-/// @todo pixel0 and pixel359 are not neighbors, they are not connected
+/// @note Consider using a more sophisticated random number generator or noise function for better diffusion effects
+/// @todo Consider using perlin noise or similar algorithm for more natural diffusion effects
 
-RainbowDiffusionEffect::RainbowDiffusionEffect(LEDStrip* strip, uint32_t start_time_ms, uint32_t duration_ms,
-                                                   float mutation_rate, uint16_t min_mutation_step, uint16_t max_mutation_step,
-                                                   uint32_t mutation_interval, uint16_t min_diffusion_diff)
+RainbowDiffusionEffect::RainbowDiffusionEffect(LEDStrip* strip, uint32_t start_time_ms, uint32_t duration_ms, float diffusion_rate, int16_t max_step_size, uint32_t refresh_interval)
     : Effect(strip, start_time_ms, duration_ms),
-      mutation_rate(mutation_rate),
-      min_mutation_step(min_mutation_step),
-      max_mutation_step(max_mutation_step),
-      last_mutation_time(start_time_ms),
-      mutation_interval(mutation_interval),
-      min_diffusion_diff(min_diffusion_diff)
+      diffusion_rate(diffusion_rate),
+      max_step_size(max_step_size),
+      refresh_interval(refresh_interval),
+      last_update_time(start_time_ms)
 {
+    min_diffusion_diff = (int)(1.0 / diffusion_rate); // Calculate minimum difference based on diffusion rate
+
+
+    /// @todo instead of fully randomizing the strip, consider using perlin noise or similar algorithm
     for(int i = 0; i < led_strip->Length(); i++) {
-        led_strip->SetPixel(i, Rainbow360[0]); // Initialize all LEDs with Rainbow color 0
-        rainbow_strip[i] = 0; // Initialize the rainbow strip array
-        updated_rainbow_strip[i] = 0; // Initialize the updated rainbow strip array
+        //uint16_t color_index = get_rand_32() % 360; // Randomly select a color index from 0 to 359
+        //uint16_t color_index = (i > 60) ? 0 : 180;
+        //uint16_t color_index = 0; // Initialize with a fixed color index (e.g., 0 for red)
+        uint16_t color_index = i;
+        rainbow_strip[i] = color_index; // Initialize the rainbow strip with random colors
+        float_rainbow_strip[i] = (float) rainbow_strip[i]; // Initialize the float rainbow strip
+        led_strip->SetPixel(i, Rainbow360[rainbow_strip[i]]); // Set the initial color of the pixel
     }
     led_strip->SetBrightness(200); // Set a reasonable brightness level
     led_strip->Update(); // Update the LED strip to apply the initial state
@@ -32,57 +36,69 @@ bool RainbowDiffusionEffect::Update(uint32_t current_time)
         return false; // Effect not started or strip not available
     }
 
-    uint32_t elapsed_time = current_time - last_mutation_time;
-    if (elapsed_time == 0) {
-        return false; // No time has passed since the last update
+    uint32_t elapsed_time = current_time - last_update_time;
+    if (elapsed_time < refresh_interval) {
+        return false; // Not enough time has passed since the last update
     }
 
     bool return_value = false;
-
-    uint32_t mutation_possibility = get_rand_32();
-    if((mutation_possibility < mutation_rate * UINT32_MAX) && (elapsed_time >= mutation_interval)) {
-        // Apply a new random color mutation
-        uint8_t pixel_index = get_rand_32() % led_strip->Length(); // Random pixel index
-        uint16_t mutation_step = min_mutation_step + (get_rand_32() % (max_mutation_step - min_mutation_step + 1));
-        rainbow_strip[pixel_index] = (rainbow_strip[pixel_index] + mutation_step) % 360;
-        led_strip->SetPixel(pixel_index, Rainbow360[rainbow_strip[pixel_index]]);
-        last_mutation_time = current_time;
-        return_value = true; // A mutation occurred
-    }
-
+    
     auto circular_distance = [](uint16_t a, uint16_t b) -> uint16_t {
         uint16_t diff = (a > b) ? (a - b) : (b - a);
         uint16_t min_diff = (diff > 180) ? (360 - diff) : diff;
         return min_diff;
     };
 
-    for (int i = 0; i < led_strip->Length(); i++) {
-        uint16_t left_color = (i == 0) ? rainbow_strip[led_strip->Length() - 1] : rainbow_strip[i - 1];
-        uint16_t current_color = rainbow_strip[i];
-        uint16_t right_color = (i == led_strip->Length() - 1) ? rainbow_strip[0] : rainbow_strip[i + 1];
+    auto signed_ring_distance = [](int a, int b) -> int {
+        int d = (a - b + 540) % 360 - 180;
+        return d;
+    };
 
-        auto signed_ring_distance = [](int a, int b) -> int {
-            int d = (a - b + 540) % 360 - 180;
-            return d;
-        };
+    /// @todo instead of uniform randomization, consider using perlin noise or similar algorithm
+    /// @todo change if(true) to a more meaningful condition
+    /// @todo randomly decrease the color index of a random pixel to create noise
+    if(true) {
+        uint16_t random_index = get_rand_32() % led_strip->Length();
+        uint16_t random_increase = get_rand_32() % max_step_size; // Randomly increase the color index by a small amount
+        float_rainbow_strip[random_index] += random_increase + min_diffusion_diff;
+        while(float_rainbow_strip[random_index] >= 360.0f) float_rainbow_strip[random_index] -= 360.0f; // Ensure the value is within 0-359
+        rainbow_strip[random_index] = (int) float_rainbow_strip[random_index];
+        rainbow_strip[random_index] %= 360; // Wrap around to keep the index within 0-359
+        return_value = true; // A change occurred due to noise
+    }
 
-        if (circular_distance(current_color, left_color) >= min_diffusion_diff ||
-            circular_distance(current_color, right_color) >= min_diffusion_diff) {
-            int left_distance = signed_ring_distance(left_color, current_color);
-            int right_distance = signed_ring_distance(right_color, current_color);
-            int avg_distance = (left_distance + right_distance) / 3;
-            int new_color = (current_color + avg_distance + 360) % 360;
-            updated_rainbow_strip[i] = static_cast<uint16_t>(new_color);
+    // iterate through the entire strip, except the last pixel to form a linear not ring
+    /// @note check every pair of current and right neighbor will cover the entire strip, no need to check left neighbor
+    /// @todo consider using a helper function to reduce code duplication
+    for (int i = 0; i < led_strip->Length() - 1; i++) {
+        uint16_t current_index = i;
+        uint16_t right_index = (i == led_strip->Length() - 1) ? 0 : (i + 1);
+
+        uint16_t current_color_index = rainbow_strip[current_index];
+        uint16_t right_color_index = rainbow_strip[right_index];
+
+        /// @todo make this algorithm as a diffusion helper function
+        if(circular_distance(current_color_index, right_color_index) >= min_diffusion_diff) {
+            int16_t diff = signed_ring_distance(current_color_index, right_color_index);
+            float delta = (diffusion_rate * (float) diff);
+            if(delta > max_step_size) delta = (float) max_step_size; // Limit the step size to the maximum allowed
+            if(delta < -max_step_size) delta = (float) -max_step_size; // Limit the
+            float_rainbow_strip[current_index] -= delta;
+            float_rainbow_strip[right_index] += delta;
             return_value = true; // A change occurred
-        } else {
-            updated_rainbow_strip[i] = current_color;
         }
     }
 
     for(int i = 0; i < led_strip->Length(); i++) {
-        led_strip->SetPixel(i, Rainbow360[updated_rainbow_strip[i]]);
-        rainbow_strip[i] = updated_rainbow_strip[i];
+        while(float_rainbow_strip[i] < 0) float_rainbow_strip[i] += 360.0f; // Ensure the value is non-negative
+        while(float_rainbow_strip[i] >= 360.0f) float_rainbow_strip[i] -= 360.0f; // Ensure the value is within 0-359
+        rainbow_strip[i] = (int) float_rainbow_strip[i];
+        rainbow_strip[i] %= 360; // Wrap around to keep the index within 0-359
+        // Update the LED strip with the new color
+        led_strip->SetPixel(i, Rainbow360[rainbow_strip[i]]);
     }
+
+    last_update_time = current_time; // Update the last update time
 
     return return_value;
 }
