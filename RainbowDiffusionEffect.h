@@ -39,6 +39,7 @@ private:
     uint32_t last_mutation_time; ///< Last time a mutation occurred
     uint32_t mutation_interval; ///< Minimum interval between mutations in milliseconds
     uint16_t min_diffusion_diff; ///< Minimum difference for diffusion effect
+    uint8_t pixel_index; ///< Index of the pixel that was mutated last
 };
 
 

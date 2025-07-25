@@ -25,7 +25,7 @@ int main(void) {
 
     //DiffusionEffect diffusion_effect(&led_strip, 0, 10000, 0.1f, 100, 0.99f);
 
-    RainbowDiffusionEffect rainbow_diffusion_effect(&led_strip, 0, 10000, 0.5f, 90, 180, 100, 2);
+    RainbowDiffusionEffect rainbow_diffusion_effect(&led_strip, 0, 10000, 0.01f, 90, 180, 1000, 3);
 
     sleep_ms(5000); // Allow some time for initialization
 
