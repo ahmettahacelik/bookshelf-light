@@ -3,6 +3,10 @@
 
 #include "LEDStrip.h"
 
+/// @todo Remove is_periodic flag and related logic
+/// @todo Remove duration_ms and related logic
+/// @todo Add refresh_interval_ms or refresh_speed to control how often the effect updates
+
 class Effect
 {
 protected:
