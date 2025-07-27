@@ -27,7 +27,8 @@ RainbowDiffusionEffect::RainbowDiffusionEffect(LEDStrip* strip, uint32_t start_t
         float_rainbow_strip[i] = (float) rainbow_strip[i]; // Initialize the float rainbow strip
         led_strip->SetPixel(i, Rainbow360[rainbow_strip[i]]); // Set the initial color of the pixel
     }
-    led_strip->SetBrightness(200); // Set a reasonable brightness level
+    // Brightness is controlled by the ButtonManager, so we don't set it here
+    //led_strip->SetBrightness(200); // Set a reasonable brightness level
     led_strip->Update(); // Update the LED strip to apply the initial state
 
     random_noise_index = get_rand_32() % led_strip->Length(); // Initialize the random noise index

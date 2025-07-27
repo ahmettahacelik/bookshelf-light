@@ -2,6 +2,8 @@
 
 #include <pico/stdlib.h>
 
+#include "ButtonManager.h"
+
 #include "RainbowEffect.h"
 #include "BreatheEffect.h"
 #include "LoadingEffect.h"
@@ -17,6 +19,15 @@ int main(void) {
 
     sleep_ms(1000); // Allow some time for initialization
 
+    Button button(17);
+    button.Update();
+
+    const uint8_t BrightnessLevel[6] = {0, 0xf, 0x1f, 0x3f, 0x7f, 0xff};
+    const uint8_t BrightnessLevelSize = sizeof(BrightnessLevel) / sizeof(BrightnessLevel[0]);
+
+    uint8_t brightness_index = 4; // Start with a mid-level brightness
+    led_strip.SetBrightness(BrightnessLevel[brightness_index]);
+    
     //RainbowEffect rainbow_effect(&led_strip, 0, 10000, true, true);
 
     //BreatheEffect breathe_effect(&led_strip, 0, 10000, 0x55ff00, 0, 255);
@@ -35,7 +46,11 @@ int main(void) {
         if(rainbow_diffusion_effect.Update(current_time)) {
             led_strip.Update();
         }
-
+        if(button.PosEdge()) {
+            brightness_index = (brightness_index + 1) % BrightnessLevelSize;
+            led_strip.SetBrightness(BrightnessLevel[brightness_index]);
+        }
+        button.Update();
         sleep_ms(10);
     }
 
